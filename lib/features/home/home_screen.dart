@@ -81,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 4.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
+        side: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
       color: AppColors.surface,
       child: Padding(

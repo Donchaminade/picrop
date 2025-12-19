@@ -1,8 +1,9 @@
+import 'dart:ui'; // Required for ImageFilter
 import 'package:picroper/shared/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:extended_image/extended_image.dart';
-import 'dart:io'; // Import for File class
+import 'dart:io';
 import 'package:picroper/config/app_colors.dart';
 import 'package:picroper/config/app_text_styles.dart';
 
@@ -10,12 +11,14 @@ class ValidationScreen extends StatefulWidget {
   final String imagePath;
   final double widthCm;
   final double heightCm;
+  final String? imageQuality;
 
   const ValidationScreen({
     super.key,
     required this.imagePath,
     required this.widthCm,
     required this.heightCm,
+    this.imageQuality,
   });
 
   @override
@@ -25,90 +28,204 @@ class ValidationScreen extends StatefulWidget {
 class _ValidationScreenState extends State<ValidationScreen> {
   int _quantity = 1;
   bool _isXpressDelivery = false;
-  String _support = 'Papier Premium'; // Default support
-  String _frame = 'Bords Blanche Élité'; // Default frame
+  String _support = 'Papier Premium';
+  String _frame = 'Bords Blanche Élité';
 
-  // Placeholder for price calculation
   double get _unitPrice {
-    // This would be dynamic based on size, support, frame, etc.
-    return 1500.0; // Example price in Fcfa
+    return 1500.0;
   }
 
   double get _totalAmount {
     double total = _unitPrice * _quantity;
     if (_isXpressDelivery) {
-      total += 500; // Example Xpress delivery fee
+      total += 1500;
     }
     return total;
   }
 
-  Future<bool?> _showDeliveryDetailsPopup() async {
-    return showDialog<bool?>(
-      context: context,
-      builder: (BuildContext context) {
-        final TextEditingController cityController = TextEditingController();
-        final TextEditingController neighborhoodController = TextEditingController();
-        final TextEditingController descriptionController = TextEditingController();
-        final TextEditingController phone1Controller = TextEditingController();
-        final TextEditingController phone2Controller = TextEditingController();
+  Future<Map<String, String>?> _showDeliveryDetailsPopup() async {
+    final List<String> _togoCities = [
+      'Lomé',
+      'Kara',
+      'Sokodé',
+      'Kpalimé',
+      'Atakpamé',
+      'Dapaong',
+      'Tsévié',
+      'Aného',
+      'Mango',
+      'Bafilo',
+      'Niamtougou',
+      'Badou',
+    ];
+    String _selectedCity = 'Lomé'; // Default city
 
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20), bottom: Radius.zero),
-          ),
-          title: Text(
-            'Détails de livraison',
-            style: AppTextStyles.headline2.copyWith(color: AppColors.primary),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: cityController,
-                  decoration: InputDecoration(labelText: 'Ville'),
-                ),
-                TextField(
-                  controller: neighborhoodController,
-                  decoration: InputDecoration(labelText: 'Quartier'),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(labelText: 'Description (Précisions)'),
-                  maxLines: 3,
-                ),
-                TextField(
-                  controller: phone1Controller,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(labelText: 'Numéro de téléphone (WhatsApp préféré)'),
-                ),
-                TextField(
-                  controller: phone2Controller,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(labelText: 'Autre numéro à contacter'),
-                ),
-              ],
+    TextEditingController neighborhoodController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
+    TextEditingController phone1Controller = TextEditingController();
+    TextEditingController phone2Controller = TextEditingController();
+
+    // Use a temporary context for showModalBottomSheet to ensure it's valid
+    final result = await showModalBottomSheet<Map<String, String>?>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            decoration: BoxDecoration(
+              color: AppColors.surface.withOpacity(0.8),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.5), width: 1),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Détails de livraison',
+                        style: AppTextStyles.headline2.copyWith(color: AppColors.primary),
+                      ),
+                      const SizedBox(height: 20),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              DropdownButtonFormField<String>(
+                                value: _selectedCity,
+                                decoration: InputDecoration(
+                                  labelText: 'Ville',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                  ),
+                                ),
+                                items: _togoCities.map((String city) {
+                                  return DropdownMenuItem<String>(
+                                    value: city,
+                                    child: Text(city),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _selectedCity = newValue;
+                                    });
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: neighborhoodController,
+                                decoration: InputDecoration(
+                                  labelText: 'Quartier',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: descriptionController,
+                                maxLines: 3,
+                                decoration: InputDecoration(
+                                  labelText: 'Description (Précisions)',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: phone1Controller,
+                                keyboardType: TextInputType.phone,
+                                decoration: InputDecoration(
+                                  labelText: 'Numéro WhatsApp',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: phone2Controller,
+                                keyboardType: TextInputType.phone,
+                                decoration: InputDecoration(
+                                  labelText: 'Autre numéro',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            child: const Text('Annuler'),
+                            onPressed: () {
+                              Navigator.of(context).pop(null); // Return null on cancel
+                            },
+                          ),
+                          ElevatedButton(
+                            child: const Text('Confirmer'),
+                            onPressed: () {
+                              Navigator.of(context).pop({
+                                'city': _selectedCity,
+                                'neighborhood': neighborhoodController.text,
+                                'description': descriptionController.text,
+                                'phone1': phone1Controller.text,
+                                'phone2': phone2Controller.text,
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () {
-                Navigator.of(context).pop(false); // Return false on cancel
-              },
-            ),
-            ElevatedButton(
-              child: Text('Confirmer'),
-              onPressed: () {
-                // Here you would typically save these details
-                print('Delivery details: ${cityController.text}, ${neighborhoodController.text}, ${phone1Controller.text}');
-                Navigator.of(context).pop(true); // Return true on confirm
-              },
-            ),
-          ],
         );
       },
     );
+    // Dispose controllers after the dialog is closed if they are not needed outside.
+    // However, since they are declared inside the function, they will be garbage collected.
+    return result;
   }
 
   @override
@@ -126,7 +243,6 @@ class _ValidationScreenState extends State<ValidationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image Preview and Filename
             Row(
               children: [
                 Container(
@@ -143,7 +259,7 @@ class _ValidationScreenState extends State<ValidationScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    widget.imagePath.split('/').last, // Display filename
+                    widget.imagePath.split('/').last,
                     style: AppTextStyles.bodyText1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -152,116 +268,153 @@ class _ValidationScreenState extends State<ValidationScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Caractéristiques Block
             Text(
               'Caractéristiques',
               style: AppTextStyles.headline2,
             ),
             const SizedBox(height: 8),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCharacteristicRow('Format:', '${widget.widthCm.toStringAsFixed(1)} x ${widget.heightCm.toStringAsFixed(1)} cm'),
-                    _buildCharacteristicRow('Support:', _support),
-                    _buildCharacteristicRow('Cadre:', _frame),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // Option to modify characteristics
-                          // This could navigate to a settings screen or show a dialog
-                        },
-                        child: const Text('Modifier'),
-                      ),
+
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: Card(
+                  color: const Color.fromARGB(211, 255, 255, 255), // Make card transparent to show blurred background
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildCharacteristicRow('Format:', '${widget.widthCm.toStringAsFixed(1)} x ${widget.heightCm.toStringAsFixed(1)} cm'),
+                        if (widget.imageQuality != null)
+                          _buildCharacteristicRow('Qualité:', widget.imageQuality!),
+                        _buildCharacteristicRow('Support:', _support),
+                        _buildCharacteristicRow('Cadre:', _frame),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {},
+                            child: const Text('Modifier'),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
+
             const SizedBox(height: 24),
 
-            // Détails du prix Block
             Text(
               'Détails du prix',
               style: AppTextStyles.headline2,
             ),
             const SizedBox(height: 8),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPriceRow('Prix unitaire:', '${_unitPrice.toStringAsFixed(0)} Fcfa'),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: Card(
+                  color: const Color.fromARGB(216, 255, 255, 255), // Make card transparent to show blurred background
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
                       children: [
-                        Text('Quantité:', style: AppTextStyles.bodyText1),
+                        _buildPriceRow('Prix unitaire:', '${_unitPrice.toStringAsFixed(0)} Fcfa'),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle_outline),
-                              onPressed: () {
-                                setState(() {
-                                  if (_quantity > 1) _quantity--;
-                                });
-                              },
+                            Text('Quantité:', style: AppTextStyles.bodyText1),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (_quantity > 1) _quantity--;
+                                    });
+                                  },
+                                ),
+                                Text('$_quantity', style: AppTextStyles.bodyText1),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () {
+                                    setState(() {
+                                      _quantity++;
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
-                            Text('$_quantity', style: AppTextStyles.bodyText1),
-                            IconButton(
-                              icon: const Icon(Icons.add_circle_outline),
-                              onPressed: () {
-                                setState(() {
-                                  _quantity++;
-                                });
+                          ],
+                        ),
+                        const Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Option Xpress:', style: AppTextStyles.bodyText1),
+                            Switch(
+                              value: _isXpressDelivery,
+                              onChanged: (bool value) {
+                                setState(() => _isXpressDelivery = value);
                               },
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Option Xpress:', style: AppTextStyles.bodyText1),
-                        Switch(
-                          value: _isXpressDelivery,
-                          onChanged: (bool value) {
-                            setState(() {
-                              _isXpressDelivery = value;
-                              // Removed _showDeliveryDetailsPopup() here
-                            });
-                          },
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4.0, bottom: 8.0),
+                          child: Text(
+                            'Livraison rapide en 24-48h pour 1500 Fcfa.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primaryLight,
+                            ),
+                          ),
+                        ),
+                        const Divider(),
+                        _buildPriceRow(
+                          'Total:',
+                          '${_totalAmount.toStringAsFixed(0)} Fcfa',
+                          isTotal: true,
                         ),
                       ],
                     ),
-                    const Divider(),
-                    _buildPriceRow('Total:', '${_totalAmount.toStringAsFixed(0)} Fcfa', isTotal: true),
-                  ],
+                  ),
                 ),
               ),
             ),
+
             const SizedBox(height: 32),
 
-            // Confirm and Pay Button
             ElevatedButton(
               onPressed: () async {
-                final bool? confirmed = await _showDeliveryDetailsPopup();
-                if (confirmed == true) {
+                final Map<String, String>? deliveryDetails = await _showDeliveryDetailsPopup();
+                if (deliveryDetails != null) {
+                  // Now use the deliveryDetails map to navigate
                   context.pushNamed(
                     'confirmation',
                     extra: {
-                      'orderNumber': 'CMD-${DateTime.now().millisecondsSinceEpoch}', // Placeholder order number
+                      'orderNumber': 'CMD-${DateTime.now().millisecondsSinceEpoch}',
                       'imagePath': widget.imagePath,
                       'format': '${widget.widthCm.toStringAsFixed(1)} x ${widget.heightCm.toStringAsFixed(1)} cm',
                       'support': _support,
                       'frame': _frame,
                       'quantity': _quantity,
                       'totalAmount': _totalAmount,
+                      'deliveryCity': deliveryDetails['city'], // Pass city
+                      'deliveryNeighborhood': deliveryDetails['neighborhood'], // Pass neighborhood
+                      'deliveryDescription': deliveryDetails['description'], // Pass description
+                      'deliveryPhone1': deliveryDetails['phone1'], // Pass phone1
+                      'deliveryPhone2': deliveryDetails['phone2'], // Pass phone2
                     },
                   );
                 }

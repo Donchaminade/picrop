@@ -181,11 +181,19 @@ class _ResizeScreenState extends State<ResizeScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
+                          color: AppColors.surface.withOpacity(0.5), // Subtle transparent background
                           border: Border.all(
                             color: _getQualityBorderColor(_imageQuality),
                             width: 3.0,
                           ),
                           borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         // Use AspectRatio to enforce the desired dimensions, and BoxFit.cover for visual cropping
                         child: AspectRatio(
@@ -230,9 +238,16 @@ class _ResizeScreenState extends State<ResizeScreen> {
                         child: TextField(
                           controller: _widthController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Largeur (cm)',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: AppColors.primary),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                            ),
                           ),
                           onChanged: (value) {
                             setState(() {
@@ -247,9 +262,16 @@ class _ResizeScreenState extends State<ResizeScreen> {
                         child: TextField(
                           controller: _heightController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Hauteur (cm)',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: AppColors.primary),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                            ),
                           ),
                           onChanged: (value) {
                             setState(() {
@@ -307,6 +329,7 @@ class _ResizeScreenState extends State<ResizeScreen> {
                           'imagePath': widget.imagePath,
                           'widthCm': _currentWidthCm,
                           'heightCm': _currentHeightCm,
+                          'imageQuality': _qualityMessage,
                         },
                       );
                     },
