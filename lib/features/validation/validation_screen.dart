@@ -58,14 +58,13 @@ class _ValidationScreenState extends State<ValidationScreen> {
       'Niamtougou',
       'Badou',
     ];
-    String _selectedCity = 'Lomé'; // Default city
 
+    TextEditingController _cityInputController = TextEditingController(text: 'Lomé'); // Default city
     TextEditingController neighborhoodController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
     TextEditingController phone1Controller = TextEditingController();
     TextEditingController phone2Controller = TextEditingController();
 
-    // Use a temporary context for showModalBottomSheet to ensure it's valid
     final result = await showModalBottomSheet<Map<String, String>?>(
       context: context,
       isScrollControlled: true,
@@ -96,31 +95,61 @@ class _ValidationScreenState extends State<ValidationScreen> {
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              DropdownButtonFormField<String>(
-                                value: _selectedCity,
-                                decoration: InputDecoration(
-                                  labelText: 'Ville',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(color: AppColors.primary),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                                  ),
-                                ),
-                                items: _togoCities.map((String city) {
-                                  return DropdownMenuItem<String>(
-                                    value: city,
-                                    child: Text(city),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  if (newValue != null) {
-                                    setState(() {
-                                      _selectedCity = newValue;
-                                    });
+                              RawAutocomplete<String>(
+                                optionsBuilder: (TextEditingValue textEditingValue) {
+                                  if (textEditingValue.text == '') {
+                                    return const Iterable<String>.empty();
                                   }
+                                  return _togoCities.where((String option) {
+                                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                                  });
+                                },
+                                fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                                  _cityInputController = textEditingController; // Keep controller in sync
+                                  return TextField(
+                                    controller: textEditingController,
+                                    focusNode: focusNode,
+                                    decoration: InputDecoration(
+                                      labelText: 'Ville',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(color: AppColors.primary),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+                                  return Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Material(
+                                      elevation: 4.0,
+                                      child: SizedBox(
+                                        height: 200.0,
+                                        child: ListView.builder(
+                                          padding: EdgeInsets.zero,
+                                          itemCount: options.length,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            final String option = options.elementAt(index);
+                                            return GestureDetector(
+                                              onTap: () {
+                                                onSelected(option);
+                                              },
+                                              child: ListTile(
+                                                title: Text(option),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                onSelected: (String selection) {
+                                  _cityInputController.text = selection; // Update text field on selection
                                 },
                               ),
                               const SizedBox(height: 12),
@@ -197,14 +226,14 @@ class _ValidationScreenState extends State<ValidationScreen> {
                           TextButton(
                             child: const Text('Annuler'),
                             onPressed: () {
-                              Navigator.of(context).pop(null); // Return null on cancel
+                              Navigator.of(context).pop(null);
                             },
                           ),
                           ElevatedButton(
                             child: const Text('Confirmer'),
                             onPressed: () {
                               Navigator.of(context).pop({
-                                'city': _selectedCity,
+                                'city': _cityInputController.text,
                                 'neighborhood': neighborhoodController.text,
                                 'description': descriptionController.text,
                                 'phone1': phone1Controller.text,
@@ -223,8 +252,11 @@ class _ValidationScreenState extends State<ValidationScreen> {
         );
       },
     );
-    // Dispose controllers after the dialog is closed if they are not needed outside.
-    // However, since they are declared inside the function, they will be garbage collected.
+    _cityInputController.dispose();
+    neighborhoodController.dispose();
+    descriptionController.dispose();
+    phone1Controller.dispose();
+    phone2Controller.dispose();
     return result;
   }
 
