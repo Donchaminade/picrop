@@ -1,0 +1,77 @@
+## Interface 2 — Redimensionnement (Ajustement visuel et dimensionnel)
+
+Rôle principal : permettre à l’utilisateur de visualiser l’image, adapter ses proportions et définir des dimensions physiques en centimètres, px ou autre.
+
+Éléments clés :
+
+1. Affichage vertical de l’image centrée, sortant les dimensions exactes de la photo.
+2. Indicateur visuel de qualité ou d’adaptabilité : permet d’informer l’utilisateur de la netteté d’impression selon les dimensions choisies. donc quand c'est bon, les bordures sont vertes
+   quand c'est abordable, c'est orange et quand c'est mauvais en rouge. avec une texte en haut sous forme d'etiquette ayant les couleurs selon excellent, abordable ou mauvais.
+   
+3. Section “Dimensions” composée :
+
+   * Deux champs (ou contrôles) : largeur (ex. 21,0 cm) et hauteur (ex. 29,7 cm)
+   * Saisie numérique directe, et des bouton de redimention comme des volumes en bas Largeur et Hauteur pour ceux qui veulent pas saisir iconographie discrète.
+4. Deux boutons d’action :
+
+   * “Modifier” pour reprendre des ajustements,
+   * “Valider” pour confirmer et passer à l’écran de validation finale.
+5. L’ensemble offre un contrôle précis, tout en représentant fidèlement un rapport d’aspect reproductible.
+
+Usage :
+
+* L’utilisateur confirme des paramètres physiques d’impression et l’application calcule automatiquement les implications en qualité.
+
+---
+
+## Interface 3 — Validation (Caractéristiques et paiement)
+
+Rôle principal : récapitulatif avant paiement, combinant affichage des propriétés techniques de l’impression et chiffrage.
+
+Éléments clés :
+
+1. Aperçu miniature de l’image avec son nom de fichier.
+2. Bloc “Caractéristiques” incluant :
+
+   * Format sélectionné (celui des dimensions configurer par l'utilisateur)
+   * Support (exemple : Papier Premium)
+   * Cadre (exemple : Bords Blanche Élité)
+   * Une option “Modifier” permettant de changer ces caractéristiques.
+3. Bloc “Détails du prix” comprenant :
+
+   * Prix unitaire (ex. 1500 Fcfa)
+   * Sélecteur de quantité
+   * Calcul automatique du total
+   * Option Xpress (livraison max 2 jours a partir de la date de reception et validation de la commande (statut Pris en charge))
+   *pop-up sortant du bar avec bordures haut arrondies demandant la Ville, le quartier, description(plus de precision), 
+   numro de telephone(whatsapp de preference), Un autre numero a contacter si inaccessible
+4. Bouton principal : “Confirmer et Payer”.
+
+Usage :
+
+* L’utilisateur valide ses choix, la quantité, et donne son accord intelligent avant de déclencher une commande payante.
+
+---
+
+## Interface 4 — Confirmation (Preuve de commande)
+
+Rôle principal : notifier une réussite transactionnelle et finaliser la boucle de confiance.
+
+Éléments clés :
+
+1. Icône ronde confirmant la réussite (checkmark en surbrillance).
+2. Message central : “Merci pour votre commande !” indiquant bonheur et clôture.
+3. Détails du statut :
+
+   * Numéro de commande dynamique (ex. CMD-3352) avec un badge “Confirmée”. (bage de certifier facebook + le texte "“Confirmée” de couleur verte dans un fond vert air transparent)
+   * Informations sur le produit commandé (nom du pack, format, illustration miniature).
+   * Date estimée de livraison. (preceder de icone bus de livraison)
+   
+4. Bouton principal : “Retour à l’accueil”.
+5. Message supplémentaire : possibilité de consulter l’historique des commandes.
+
+Usage :
+
+* L’utilisateur conclut l’achat, prend note des références logistiques, puis peut soit revenir à l’accueil, soit poursuivre une nouvelle commande.
+
+---

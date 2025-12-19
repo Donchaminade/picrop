@@ -1,0 +1,6 @@
+ok maintenant on peut consulter l'historique des commandes et voir    │
+│   la photo, les details. avant la confirmation et validation, le        │
+│   client peut definir la duree max qu'il veut et un montant. c'est      │
+│   l'option Xpress. pour une duree de 2 jours a partir de la date de     │
+│   validation de reception de la commade, on a 1500 fcfa de plus. les    │
+│   prix sont en CFA   
